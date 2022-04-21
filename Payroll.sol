@@ -3,15 +3,10 @@ pragma solidity ^0.8.12;
 
 contract Payroll {
 
-//Array de nome, address e salário
-//Consultar total a pagar de salário
-//Pagar salário
-
     struct Employee {
         address addrEmployee;
         address addrBoss;
         uint wage;
-        bool employed;
     }
 
     struct Employer {
@@ -29,17 +24,25 @@ contract Payroll {
         payroll[_addrEmployee].addrEmployee = _addrEmployee;
         payroll[_addrEmployee].addrBoss = msg.sender;
         payroll[_addrEmployee].wage = _wage;
-        payroll[_addrEmployee].employed = true;
     }
 
     function claimSalary(address _addressBoss) public payable {
         require(msg.sender == payroll[msg.sender].addrEmployee, "You can't claim money");
         require(payroll[msg.sender].wage <= employers[_addressBoss].deposit, "Your company has not enough funds");
-        require(payroll[msg.sender].employed = true, "You don't work for this company anymore");
-        employers[msg.sender].deposit -= payroll[msg.sender].wage;
-        //Verificar se o empregado só pode tirar o dinheiro da própria empresa + contabilizar tempo para próxima retirada
+        require(payroll[msg.sender].addrBoss == _addressBoss, "You don't work for this company");
+        employers[_addressBoss].deposit -= payroll[msg.sender].wage;
         (bool success,) = msg.sender.call{value: payroll[msg.sender].wage}("");
         require(success, "Failed to send Ether");
+    }
+
+    function fireEmployee(address _addrEmployee) public {
+        require(payroll[_addrEmployee].addrBoss == msg.sender, "This person is not your employee");
+        payroll[_addrEmployee].addrBoss = 0x0000000000000000000000000000000000000000;
+    }
+
+    function changeWage(address _addrEmployee, uint _newWage) public {
+        require(payroll[_addrEmployee].addrBoss == msg.sender, "This person is not your employee");
+        payroll[_addrEmployee].wage = _newWage;
     }
 
     function getContractBalance() public view returns(uint) {

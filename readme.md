@@ -33,7 +33,7 @@ contract Payroll {
     mapping(address => Employee) public payroll;
 ```
 
-## Functions for the company 🏦
+## Functions for the companies 🏦
 
 The functions of the code that are designed for companies are:
 * deposit: you can deposit the amount of ether that you're going to use to pay your employees

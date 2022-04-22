@@ -7,6 +7,7 @@ contract Payroll {
         address addrEmployee;
         address addrBoss;
         uint wage;
+        uint lastPaid;
     }
 
     struct Employer {
@@ -24,12 +25,15 @@ contract Payroll {
         payroll[_addrEmployee].addrEmployee = _addrEmployee;
         payroll[_addrEmployee].addrBoss = msg.sender;
         payroll[_addrEmployee].wage = _wage;
+        payroll[_addrEmployee].lastPaid = block.timestamp;
     }
 
     function claimSalary(address _addressBoss) public payable {
         require(msg.sender == payroll[msg.sender].addrEmployee, "You can't claim money");
         require(payroll[msg.sender].wage <= employers[_addressBoss].deposit, "Your company has not enough funds");
         require(payroll[msg.sender].addrBoss == _addressBoss, "You don't work for this company");
+        require(block.timestamp >= payroll[msg.sender].lastPaid + 30 days, "You must wait 30 days for your next payment");
+        payroll[msg.sender].lastPaid = block.timestamp;
         employers[_addressBoss].deposit -= payroll[msg.sender].wage;
         (bool success,) = msg.sender.call{value: payroll[msg.sender].wage}("");
         require(success, "Failed to send Ether");
